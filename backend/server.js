@@ -10,7 +10,7 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: 'http://localhost:3000', credentials: true },
+  cors: { origin: ['http://localhost:3000', 'https://booking-apexgg.vercel.app'], credentials: true },
 });
 
 // make io accessible inside controllers via req.app.get('io')
@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'https://booking-apexgg.vercel.app'], credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
