@@ -1,6 +1,7 @@
 const Availability = require('../models/Availability');
 const Booking = require('../models/Booking');
 const Service = require('../models/Service');
+const calculateDynamicPrice = require('../utils/calculateDynamicPrice');
 
 exports.createBooking = async (req, res) => {
   try {
@@ -32,6 +33,12 @@ exports.createBooking = async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
 
+    const { finalPrice } = calculateDynamicPrice(
+      service.price,
+      updatedAvailability.date,
+      claimedSlot.startTime
+    );
+
     const booking = await Booking.create({
       customer: customerId,
       provider: updatedAvailability.provider,
@@ -41,13 +48,15 @@ exports.createBooking = async (req, res) => {
       date: updatedAvailability.date,
       startTime: claimedSlot.startTime,
       endTime: claimedSlot.endTime,
-      finalPrice: service.price,
+      finalPrice,
       isUrgent: !!isUrgent,
       status: 'pending',
     });
 
     claimedSlot.bookingId = booking._id;
     await updatedAvailability.save();
+
+    await Service.findByIdAndUpdate(service._id, { $inc: { totalBookings: 1 } });
 
     return res.status(201).json({ message: 'Booking created', booking });
   } catch (err) {
