@@ -80,6 +80,13 @@ export default function MyBookingsPage() {
     }
   };
 
+  const statusColor = {
+    pending: 'text-yellow-600',
+    confirmed: 'text-green-600',
+    completed: 'text-blue-600',
+    cancelled: 'text-red-600',
+  };
+
   return (
     <div className="min-h-[calc(100vh-73px)] bg-white w-full p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
