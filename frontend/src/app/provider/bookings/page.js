@@ -34,43 +34,68 @@ export default function ProviderBookingsPage() {
     }
   };
 
-  const statusColor = {
-    pending: 'text-yellow-600',
-    confirmed: 'text-green-600',
-    completed: 'text-blue-600',
-    cancelled: 'text-red-600',
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full p-6">
-        <h1 className="text-2xl font-bold mb-6">Incoming Bookings</h1>
+    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-6 md:p-12">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tight text-black mb-10">Incoming Bookings</h1>
 
         {loading ? (
-          <p>Loading...</p>
+          <div className="flex justify-center py-20">
+            <p className="text-gray-400 font-medium animate-pulse">Loading bookings...</p>
+          </div>
         ) : bookings.length === 0 ? (
-          <p className="text-gray-500">No bookings yet.</p>
+          <div className="text-center py-20 border border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+            <p className="text-gray-500">No incoming bookings yet.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {bookings.map((b) => (
-              <div key={b._id} className="bg-white rounded-lg shadow p-4">
-                <h2 className="font-semibold">{b.service?.title}</h2>
-                <p className="text-sm text-gray-500">Customer: {b.customer?.name}</p>
-                <p className="text-sm text-gray-500">{b.date} • {b.startTime}-{b.endTime}</p>
-                <p className={`text-sm font-medium mt-1 ${statusColor[b.status]}`}>Status: {b.status}</p>
-                <p className="text-sm text-gray-500">Payment: {b.paymentStatus}</p>
-                <p className="font-bold mt-1">₹{b.finalPrice}</p>
+              <div key={b._id} className="border border-gray-100 rounded-2xl p-6 md:p-8 hover:border-black transition-colors bg-white shadow-sm flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-widest ${statusColor[b.status] || 'text-gray-500'} bg-gray-50 border border-gray-100`}>
+                      {b.status}
+                    </span>
+                    <span className="text-sm font-medium text-gray-400">{b.date} • {b.startTime}-{b.endTime}</span>
+                  </div>
+                  
+                  <h2 className="text-2xl font-bold text-black mb-2">{b.service?.title}</h2>
+                  <p className="text-sm text-gray-500 font-medium mb-1">Customer: <span className="text-black">{b.customer?.name}</span></p>
+                  <p className="text-sm text-gray-500 font-medium">Payment: <span className="capitalize text-black">{b.paymentStatus}</span></p>
+                </div>
 
-                <div className="flex gap-2 mt-3">
-                  {b.status === 'pending' && (
-                    <>
-                      <button onClick={() => handleStatusUpdate(b._id, 'confirmed')} disabled={updatingId === b._id} className="bg-green-600 text-white rounded px-3 py-1 text-sm">Accept</button>
-                      <button onClick={() => handleStatusUpdate(b._id, 'cancelled')} disabled={updatingId === b._id} className="bg-red-500 text-white rounded px-3 py-1 text-sm">Reject</button>
-                    </>
-                  )}
-                  {b.status === 'confirmed' && (
-                    <button onClick={() => handleStatusUpdate(b._id, 'completed')} disabled={updatingId === b._id} className="bg-blue-600 text-white rounded px-3 py-1 text-sm">Mark Completed</button>
-                  )}
+                <div className="md:text-right flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start">
+                  <p className="text-2xl font-bold text-black mb-4">₹{b.finalPrice}</p>
+
+                  <div className="flex gap-2">
+                    {b.status === 'pending' && (
+                      <>
+                        <button 
+                          onClick={() => handleStatusUpdate(b._id, 'confirmed')} 
+                          disabled={updatingId === b._id} 
+                          className="bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                        >
+                          Accept
+                        </button>
+                        <button 
+                          onClick={() => handleStatusUpdate(b._id, 'cancelled')} 
+                          disabled={updatingId === b._id} 
+                          className="bg-white border border-gray-200 text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {b.status === 'confirmed' && (
+                      <button 
+                        onClick={() => handleStatusUpdate(b._id, 'completed')} 
+                        disabled={updatingId === b._id} 
+                        className="bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                      >
+                        Mark Completed
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

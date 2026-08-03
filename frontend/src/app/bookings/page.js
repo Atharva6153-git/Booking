@@ -80,57 +80,97 @@ export default function MyBookingsPage() {
     }
   };
 
-  const statusColor = {
-    pending: 'text-yellow-600',
-    confirmed: 'text-green-600',
-    completed: 'text-blue-600',
-    cancelled: 'text-red-600',
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full p-6">
-        <h1 className="text-2xl font-bold mb-6">My Bookings</h1>
+    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-6 md:p-12">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tight text-black mb-10">My Bookings</h1>
 
-        {message && <p className="mb-4 text-sm text-blue-700">{message}</p>}
+        {message && (
+          <div className="mb-8 p-4 bg-gray-50 border border-gray-200 text-black text-sm font-medium rounded-lg">
+            {message}
+          </div>
+        )}
 
         {loading ? (
-          <p>Loading...</p>
+          <div className="flex justify-center py-20">
+            <p className="text-gray-400 font-medium animate-pulse">Loading bookings...</p>
+          </div>
         ) : bookings.length === 0 ? (
-          <p className="text-gray-500">No bookings yet.</p>
+          <div className="text-center py-20 border border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+            <p className="text-gray-500">You haven't made any bookings yet.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {bookings.map((b) => (
-              <div key={b._id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex justify-between items-start">
+              <div key={b._id} className="border border-gray-100 rounded-2xl p-6 md:p-8 hover:border-black transition-colors bg-white shadow-sm">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
                   <div>
-                    <h2 className="font-semibold">{b.service?.title}</h2>
-                    <p className="text-sm text-gray-500">Provider: {b.provider?.name}</p>
-                    <p className="text-sm text-gray-500">{b.date} • {b.startTime}-{b.endTime}</p>
-                    <p className={`text-sm font-medium mt-1 ${statusColor[b.status]}`}>Status: {b.status}</p>
-                    <p className="text-sm text-gray-500">Payment: {b.paymentStatus}</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-widest ${statusColor[b.status] || 'text-gray-500'} bg-gray-50 border border-gray-100`}>
+                        {b.status}
+                      </span>
+                      <span className="text-sm font-medium text-gray-400">{b.date} • {b.startTime}-{b.endTime}</span>
+                    </div>
+                    
+                    <h2 className="text-2xl font-bold text-black mb-2">{b.service?.title}</h2>
+                    <p className="text-sm text-gray-500 font-medium mb-1">Provider: <span className="text-black">{b.provider?.name}</span></p>
+                    <p className="text-sm text-gray-500 font-medium">Payment: <span className="capitalize text-black">{b.paymentStatus}</span></p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold">₹{b.finalPrice}</p>
-                    {b.paymentStatus !== 'paid' && (
-                      <button onClick={() => handlePayNow(b)} disabled={payingId === b._id} className="mt-2 bg-green-600 text-white rounded px-3 py-1 text-sm">
-                        {payingId === b._id ? 'Loading...' : 'Pay Now'}
-                      </button>
-                    )}
-                    {b.status === 'completed' && (
-                      <button onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)} className="mt-2 bg-yellow-500 text-white rounded px-3 py-1 text-sm block">
-                        {reviewFormId === b._id ? 'Cancel' : 'Leave Review'}
-                      </button>
-                    )}
+                  
+                  <div className="md:text-right flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start">
+                    <p className="text-2xl font-bold text-black mb-4">₹{b.finalPrice}</p>
+                    
+                    <div className="flex gap-2">
+                      {b.paymentStatus !== 'paid' && (
+                        <button 
+                          onClick={() => handlePayNow(b)} 
+                          disabled={payingId === b._id} 
+                          className="bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                        >
+                          {payingId === b._id ? 'Processing...' : 'Pay Now'}
+                        </button>
+                      )}
+                      
+                      {b.status === 'completed' && (
+                        <button 
+                          onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)} 
+                          className="bg-white border border-gray-200 text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
+                        >
+                          {reviewFormId === b._id ? 'Cancel' : 'Review'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {reviewFormId === b._id && (
-                  <div className="mt-4 border-t pt-4">
-                    <label className="block text-sm font-medium mb-1">Rating (1-5)</label>
-                    <input type="number" min="1" max="5" value={reviewData.rating} onChange={(e) => setReviewData({ ...reviewData, rating: e.target.value })} className="border rounded p-2 w-20 mb-2" />
-                    <textarea placeholder="Write a comment (optional)" value={reviewData.comment} onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })} className="w-full border rounded p-2 mb-2" />
-                    <button onClick={() => handleSubmitReview(b._id)} className="bg-blue-600 text-white rounded px-4 py-2 text-sm">Submit Review</button>
+                  <div className="mt-8 pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <h3 className="font-semibold text-black mb-4">Leave a Review</h3>
+                    <div className="max-w-md">
+                      <label className="block text-sm font-medium text-gray-500 mb-2">Rating (1-5)</label>
+                      <input 
+                        type="number" 
+                        min="1" max="5" 
+                        value={reviewData.rating} 
+                        onChange={(e) => setReviewData({ ...reviewData, rating: e.target.value })} 
+                        className="w-24 border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4" 
+                      />
+                      
+                      <label className="block text-sm font-medium text-gray-500 mb-2">Comment</label>
+                      <textarea 
+                        placeholder="Share your experience..." 
+                        value={reviewData.comment} 
+                        onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })} 
+                        className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4 h-24 resize-none" 
+                      />
+                      
+                      <button 
+                        onClick={() => handleSubmitReview(b._id)} 
+                        className="bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
+                      >
+                        Submit Review
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

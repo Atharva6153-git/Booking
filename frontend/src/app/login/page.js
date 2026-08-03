@@ -38,41 +38,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6">Login</h1>
+    <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-white">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm p-6">
+        <h1 className="text-3xl font-bold mb-8 tracking-tight text-center">Welcome back</h1>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-6 text-center">{error}</p>}
 
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-3"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-4"
-          required
-        />
+        <div className="space-y-4">
+          <input
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-md p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-md p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all"
+            required
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white rounded p-2 hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-black text-white rounded-md p-3 mt-6 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Logging in...' : 'Sign In'}
         </button>
 
-        <p className="text-sm mt-4 text-center">
-          Don't have an account? <a href="/signup" className="text-blue-600">Sign Up</a>
+        <p className="text-sm mt-6 text-center text-gray-500">
+          Don't have an account? <a href="/signup" className="text-black font-medium hover:underline">Sign up</a>
         </p>
       </form>
     </div>

@@ -41,16 +41,20 @@ export default function Navbar() {
   const links = user.role === 'provider' ? providerLinks : customerLinks;
 
   return (
-    <nav className="bg-white shadow px-6 py-3 flex justify-between items-center">
-      <div className="flex gap-4 items-center">
-        <span className="font-bold text-blue-600">ServiceHub</span>
-        {links.map((link) => (
-          <a key={link.href} href={link.href} className={pathname === link.href ? 'text-sm text-blue-600 font-medium' : 'text-sm text-gray-600'}>{link.label}</a>
-        ))}
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+      <div className="flex gap-6 items-center">
+        <span className="font-bold text-xl tracking-tight text-black">ServiceHub</span>
+        <div className="flex gap-4 ml-4">
+          {links.map((link) => (
+            <a key={link.href} href={link.href} className={`text-sm font-medium transition-colors ${pathname === link.href ? 'text-black' : 'text-gray-400 hover:text-black'}`}>
+              {link.label}
+            </a>
+          ))}
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-500">{user.name} ({user.role})</span>
-        <button onClick={handleLogout} className="text-sm text-red-600">Logout</button>
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium text-gray-500">{user.name} <span className="text-gray-300">|</span> <span className="capitalize">{user.role}</span></span>
+        <button onClick={handleLogout} className="text-sm font-medium text-black hover:text-gray-600 transition-colors">Logout</button>
       </div>
     </nav>
   );
