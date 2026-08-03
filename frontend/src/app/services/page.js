@@ -58,6 +58,7 @@ export default function ServicesPage() {
               placeholder="Search services..."
               value={filters.search}
               onChange={handleFilterChange}
+              suppressHydrationWarning
               className="border border-gray-200 rounded-md p-2.5 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all flex-1 min-w-[200px]"
             />
             <input
@@ -65,6 +66,7 @@ export default function ServicesPage() {
               placeholder="Category"
               value={filters.category}
               onChange={handleFilterChange}
+              suppressHydrationWarning
               className="border border-gray-200 rounded-md p-2.5 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all hidden md:block w-32"
             />
             <input
@@ -72,6 +74,7 @@ export default function ServicesPage() {
               placeholder="Area"
               value={filters.area}
               onChange={handleFilterChange}
+              suppressHydrationWarning
               className="border border-gray-200 rounded-md p-2.5 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all hidden md:block w-32"
             />
             <button type="submit" className="bg-black text-white rounded-md px-6 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">

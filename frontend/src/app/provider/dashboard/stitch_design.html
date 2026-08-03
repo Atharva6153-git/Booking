@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NEURAL DOCK - Provider Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Sora:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#bbc9cf",
+                        "inverse-primary": "#00677f",
+                        "primary": "#a4e6ff",
+                        "surface": "#121317",
+                        "surface-container-highest": "#343539",
+                        "error": "#ffb4ab",
+                        "background": "#121317",
+                        "on-tertiary-fixed": "#1b1b1d",
+                        "secondary-fixed-dim": "#ebb2ff",
+                        "tertiary-container": "#c2bfc2",
+                        "surface-variant": "#343539",
+                        "surface-container-low": "#1a1b1f",
+                        "surface-tint": "#4cd6ff",
+                        "primary-container": "#00d1ff",
+                        "surface-bright": "#38393d",
+                        "surface-dim": "#121317",
+                        "on-primary-fixed": "#001f28",
+                        "on-secondary-fixed-variant": "#74009f",
+                        "secondary-fixed": "#f8d8ff",
+                        "secondary": "#ebb2ff",
+                        "secondary-container": "#ce5dff",
+                        "inverse-on-surface": "#2f3034",
+                        "tertiary-fixed-dim": "#c8c6c8",
+                        "on-primary-container": "#00566a",
+                        "on-primary": "#003543",
+                        "error-container": "#93000a",
+                        "tertiary": "#dedbde",
+                        "on-tertiary-fixed-variant": "#474649",
+                        "on-surface": "#e3e2e7",
+                        "outline-variant": "#3c494e",
+                        "outline": "#859399",
+                        "primary-fixed": "#b7eaff",
+                        "on-secondary-fixed": "#320047",
+                        "on-secondary": "#520071",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#4cd6ff",
+                        "inverse-surface": "#e3e2e7",
+                        "tertiary-fixed": "#e5e1e4",
+                        "on-primary-fixed-variant": "#004e60",
+                        "surface-container-high": "#292a2e",
+                        "on-background": "#e3e2e7",
+                        "on-tertiary-container": "#4e4e50",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#480064",
+                        "surface-container-lowest": "#0d0e12",
+                        "on-tertiary": "#303032",
+                        "surface-container": "#1e1f23"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        xs: "8px",
+                        sm: "16px",
+                        "safe-margin": "20px",
+                        lg: "40px",
+                        base: "4px",
+                        md: "24px",
+                        xl: "64px",
+                        gutter: "16px"
+                    },
+                    fontFamily: {
+                        "label-sm": ["Inter"],
+                        "label-bold": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "display": ["Sora"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+                        "label-bold": ["14px", { lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "400" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "34px", letterSpacing: "-0.03em", fontWeight: "700" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.03em", fontWeight: "700" }],
+                        "display": ["44px", { lineHeight: "48px", letterSpacing: "-0.04em", fontWeight: "800" }],
+                        "body-md": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }]
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        body { background-color: #121317; color: #e3e2e7; }
+        .glass-panel {
+            background: rgba(26, 27, 31, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(0, 209, 255, 0.2);
+            transition: box-shadow 0.3s ease;
+        }
+        .neon-glow:hover {
+            box-shadow: 0 0 30px rgba(206, 93, 255, 0.4);
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, #00d1ff, #ce5dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-border {
+            position: relative;
+            background-clip: padding-box;
+            border: 1px solid transparent;
+        }
+        .bg-gradient-border::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -1px;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        }
+        
+        /* Grid background pattern */
+        .bg-grid {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="font-body-md antialiased min-h-screen relative overflow-x-hidden">
+<!-- Atmospheric Shader Background -->
+<div class="fixed inset-0 z-[-2] pointer-events-none opacity-40">
+
+</div>
+<!-- Subtle Grid Overlay -->
+<div class="fixed inset-0 z-[-1] pointer-events-none bg-grid"></div>
+<!-- Top App Bar (Web) -->
+<header class="hidden md:flex justify-between items-center px-gutter h-16 w-full max-w-screen-xl mx-auto fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,209,255,0.15)]">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A futuristic, hyper-realistic avatar portrait of a sci-fi technician in a neon-lit environment, showcasing high-end digital art style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuCJUlRIYAmVfEk1uStTmVQP2PihBlrdzRqF45hA2ujJ0xtKSDuQcOe40wgclOrUlhl4F7ck70kMrspAhdwNR6j9EdjJOj9sZrQOv7mSo5HrNrWj4K8H-WscP1PcnoxmtI-HFu_WztezfB26yW5eBjyzCmfy0W34OO0DXlSUOoPQyCCdI3Str-aGNr10FRSeJxaNhIM38T6bbssQL9Tnl3roG7Wwyad-iEjDsO19MyuWg-dt4rT-pap21sfNiOyP5MXQJVf3m2uDmZ"/>
+</div>
+<span class="font-display text-headline-md-mobile tracking-tighter text-primary-container">NEURAL DOCK</span>
+</div>
+<nav class="flex gap-md">
+<a class="text-on-surface-variant font-label-bold text-label-bold hover:bg-white/5 transition-colors px-3 py-2 rounded-lg flex items-center gap-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">grid_view</span>
+                Overview
+            </a>
+<a class="text-primary font-label-bold text-label-bold flex items-center gap-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                My Services
+            </a>
+<a class="text-on-surface-variant font-label-bold text-label-bold hover:bg-white/5 transition-colors px-3 py-2 rounded-lg flex items-center gap-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+                Earnings
+            </a>
+<a class="text-on-surface-variant font-label-bold text-label-bold hover:bg-white/5 transition-colors px-3 py-2 rounded-lg flex items-center gap-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                Config
+            </a>
+</nav>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Top App Bar (Mobile) -->
+<header class="md:hidden flex justify-between items-center px-gutter h-16 w-full fixed top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,209,255,0.15)]">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A futuristic, hyper-realistic avatar portrait of a sci-fi technician in a neon-lit environment, showcasing high-end digital art style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-TprOWeJi684ZqqXfjWjcoCzLv3wqTistmdiGW24f0esGUxu2qYxiht6aHq859pXvtzi6edK9W7ogchLgpFm1c3Wm3qe9p1lKco1ADBhJcWkZq8csdRC5qW5KFu5hTN5LjvJPbDtwlJrFg5PeBCwg5ljSuXfEzK9q6ihV9a4qagCbe31_Fx_Ws5wWj_XraqJQ9drZNJtNOu2wsV_ZOUjQb736Yr3sOG6rZPlfaLafHWDkhmTaLbvq9N-PLCaoz2jVNVonEPxJC2L6"/>
+</div>
+<span class="font-display text-headline-md-mobile tracking-tighter text-primary-container">NEURAL DOCK</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Layout -->
+<main class="pt-[80px] pb-[100px] md:pb-lg max-w-screen-xl mx-auto px-safe-margin min-h-screen flex flex-col md:flex-row gap-lg">
+<!-- Sidebar Navigation (Desktop) -->
+<aside class="hidden md:block w-64 shrink-0 mt-lg">
+<div class="glass-panel rounded-xl p-sm sticky top-[100px]">
+<nav class="flex flex-col gap-xs">
+<a class="flex items-center gap-sm p-3 rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold text-label-bold">Command Center</span>
+</a>
+<a class="flex items-center gap-sm p-3 rounded-lg bg-primary-container/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(0,209,255,0.1)] transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">view_list</span>
+<span class="font-label-bold text-label-bold">My Services</span>
+</a>
+<a class="flex items-center gap-sm p-3 rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">schedule</span>
+<span class="font-label-bold text-label-bold">Availability</span>
+</a>
+<a class="flex items-center gap-sm p-3 rounded-lg text-on-surface-variant hover:bg-white/5 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-bold text-label-bold">History Logs</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Area -->
+<section class="flex-1 mt-md md:mt-lg flex flex-col gap-lg">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-sm">
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2 text-gradient">Service Roster</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your active offerings and pricing nodes.</p>
+</div>
+<button class="glass-panel bg-gradient-border px-6 py-3 rounded-lg flex items-center gap-2 text-primary font-label-bold text-label-bold neon-glow active:scale-95 transition-transform duration-200 w-full md:w-auto justify-center" onclick="document.getElementById('add-service-modal').classList.remove('hidden'); document.getElementById('add-service-modal').classList.add('flex')">
+<span class="material-symbols-outlined">add</span>
+                    Deploy New Service
+                </button>
+</div>
+<!-- Bento Grid: Services -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Service Card 1 -->
+<div class="glass-panel bg-gradient-border rounded-xl p-md flex flex-col gap-sm relative group overflow-hidden neon-glow">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full blur-3xl group-hover:bg-primary-container/20 transition-colors"></div>
+<div class="flex justify-between items-start z-10">
+<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-label-bold tracking-widest uppercase bg-surface-container-high text-primary border border-primary/20">Deep Clean</span>
+<span class="font-headline-md text-headline-md text-secondary">85<span class="text-sm text-on-surface-variant">/hr</span></span>
+</div>
+<div class="w-full h-40 flex items-center justify-center my-2 z-10 relative">
+<img class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,209,255,0.3)]" src="https://lh3.googleusercontent.com/aida/AP1WRLs9XpGvJi9zshlCu_SLizNiO2ekAcz5X4LwbGPeO6G5SpEaMYcjC94r7mc6tql46X8aH4EMRcxLlz5WJqWFCi7beGnZ8JoPdOniIrJSy2m0acAAGcR4M7wIbz3sJkv9IjZPDC9aTr5usLhnv6eJ7HAv6MOTqA6mR3AdFE8opRaR0oMcy-oHUAXKB7-mRa58s2rIb-EaZ5BsHyVbj3uqbKtIn3aCG2mFb4e7Blmujz9Bdn-wMUj4HXP8_hi6"/>
+</div>
+<div class="z-10 mt-auto flex flex-col gap-1">
+<h3 class="font-headline-md text-[20px] text-on-surface">Quantum Purify</h3>
+<p class="font-body-md text-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Sector 7G, Neo-Tokyo
+                        </p>
+</div>
+<div class="z-10 mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+<span class="flex items-center gap-1 text-xs text-primary-fixed-dim">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Active
+                        </span>
+<a class="font-label-sm text-label-sm text-primary hover:text-secondary transition-colors uppercase tracking-wider flex items-center gap-1" href="#">
+                            Manage Slots <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="glass-panel bg-gradient-border rounded-xl p-md flex flex-col gap-sm relative group overflow-hidden neon-glow" style="--tw-shadow-color: rgba(206, 93, 255, 0.2);">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container/10 rounded-full blur-3xl group-hover:bg-secondary-container/20 transition-colors"></div>
+<div class="flex justify-between items-start z-10">
+<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-label-bold tracking-widest uppercase bg-surface-container-high text-secondary border border-secondary/20">Electrical</span>
+<span class="font-headline-md text-headline-md text-primary">120<span class="text-sm text-on-surface-variant">/hr</span></span>
+</div>
+<div class="w-full h-40 flex items-center justify-center my-2 z-10 relative">
+<img class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(206,93,255,0.3)]" src="https://lh3.googleusercontent.com/aida/AP1WRLsWBbHlgyWUp7KSK4LLdnnuHI0c2fdZ9j6IDWc6LRNU8mQa9FrO_geGtcxvkvrforHSMLI0rrT83WUpFB1OCdFfjQASGGFYwLbacOY_2jhSyT875BqJfJ-MZDoLXwrCqsqDUAnZgDEaLJ0RlYInbog43MlPY6pmJmTXuEt_69Dd3XWKqxvjP9XwhKXOeAMvHWERxo5K2o959DgbkhN0PEsgXyLYFGyPi4stPy0qWulQnrkFHBq81fxn54SG"/>
+</div>
+<div class="z-10 mt-auto flex flex-col gap-1">
+<h3 class="font-headline-md text-[20px] text-on-surface">Circuit Overload Fix</h3>
+<p class="font-body-md text-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> All Districts
+                        </p>
+</div>
+<div class="z-10 mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+<span class="flex items-center gap-1 text-xs text-primary-fixed-dim">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Active
+                        </span>
+<a class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors uppercase tracking-wider flex items-center gap-1" href="#">
+                            Manage Slots <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="glass-panel bg-gradient-border rounded-xl p-md flex flex-col gap-sm relative group overflow-hidden neon-glow">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full blur-3xl group-hover:bg-primary-container/20 transition-colors"></div>
+<div class="flex justify-between items-start z-10">
+<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-label-bold tracking-widest uppercase bg-surface-container-high text-primary border border-primary/20">Hardware</span>
+<span class="font-headline-md text-headline-md text-secondary">95<span class="text-sm text-on-surface-variant">/hr</span></span>
+</div>
+<div class="w-full h-40 flex items-center justify-center my-2 z-10 relative">
+<img class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,209,255,0.3)]" src="https://lh3.googleusercontent.com/aida/AP1WRLs8ChhubvNb-kANjkz3tB7OvWUMxf2ZPKcNg5SYdw6ec8xnQaSKjyx-_atSuT2Jt_41iw-XvFlmlK5fhVMuK2xAw3gz16UgKoQwJmymIFhceQpYSzM651FGyvD5G0g9nllQ3nEnMUnxhKJW0LSmKcWS2X4LYTDfBlu_FhHEYQBFBMHHoTVcvWiSu8MsojiCEAjgwOUR2shgs8G5lox2cJ5ENhCCepZc6P900oMuS-s_auwBJmOIrf3vD1L7"/>
+</div>
+<div class="z-10 mt-auto flex flex-col gap-1">
+<h3 class="font-headline-md text-[20px] text-on-surface">Mechanical Recalibration</h3>
+<p class="font-body-md text-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">location_on</span> Sector 4, Ind. Zone
+                        </p>
+</div>
+<div class="z-10 mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+<span class="flex items-center gap-1 text-xs text-surface-variant">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span> Paused
+                        </span>
+<a class="font-label-sm text-label-sm text-primary hover:text-secondary transition-colors uppercase tracking-wider flex items-center gap-1" href="#">
+                            Manage Slots <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Add Service Modal (Hidden by default) -->
+<div class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-background/80 backdrop-blur-md" id="add-service-modal">
+<div class="glass-panel rounded-2xl w-full max-w-lg relative overflow-hidden bg-gradient-border shadow-[0_0_50px_rgba(0,209,255,0.2)]">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
+<div class="p-md flex justify-between items-center border-b border-white/10">
+<h2 class="font-headline-md text-[24px] text-on-surface">Initialize New Protocol</h2>
+<button class="text-on-surface-variant hover:text-error transition-colors" onclick="document.getElementById('add-service-modal').classList.add('hidden'); document.getElementById('add-service-modal').classList.remove('flex')">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-md flex flex-col gap-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Designation (Title)</label>
+<input class="w-full bg-surface-container/50 border-b border-outline-variant focus:border-primary text-on-surface py-2 px-3 outline-none transition-colors font-body-md placeholder:text-on-surface-variant/50" placeholder="e.g. Plasma Conduit Routing" type="text"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Classification</label>
+<select class="w-full bg-surface-container/50 border-b border-outline-variant focus:border-primary text-on-surface py-2 px-3 outline-none transition-colors font-body-md appearance-none">
+<option>Cleaning &amp; Sanitization</option>
+<option>Energy Systems (Electrical)</option>
+<option>Mechanical Repairs</option>
+<option>Data Infrastructure</option>
+</select>
+</div>
+<div class="flex gap-sm">
+<div class="flex flex-col gap-1 flex-1">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Rate (Credits/Hr)</label>
+<div class="relative">
+<span class="absolute left-3 top-2 text-on-surface-variant">¤</span>
+<input class="w-full bg-surface-container/50 border-b border-outline-variant focus:border-primary text-on-surface py-2 pl-8 pr-3 outline-none transition-colors font-body-md" placeholder="0.00" type="number"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Operational Parameters (Desc)</label>
+<textarea class="w-full bg-surface-container/50 border-b border-outline-variant focus:border-primary text-on-surface py-2 px-3 outline-none transition-colors font-body-md resize-none placeholder:text-on-surface-variant/50" placeholder="Define service constraints and expected outputs..." rows="3"></textarea>
+</div>
+</div>
+<div class="p-md border-t border-white/10 flex justify-end gap-3 bg-surface-container-low/30">
+<button class="px-6 py-2 rounded font-label-bold text-label-bold text-on-surface-variant hover:text-on-surface transition-colors" onclick="document.getElementById('add-service-modal').classList.add('hidden'); document.getElementById('add-service-modal').classList.remove('flex')">Abort</button>
+<button class="px-6 py-2 rounded font-label-bold text-label-bold bg-primary text-on-primary hover:bg-primary-container shadow-[0_0_15px_rgba(0,209,255,0.4)] transition-all active:scale-95">Deploy Sequence</button>
+</div>
+</div>
+</div>
+<!-- Bottom Nav Bar (Mobile) -->
+<nav class="md:hidden flex justify-around items-center h-16 px-4 w-full max-w-md mx-auto fixed bottom-4 left-4 right-4 rounded-full z-50 bg-surface-container-low/60 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+<a class="flex items-center justify-center text-on-surface-variant/70 w-12 h-12 hover:text-primary transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+</a>
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-12 h-12 shadow-[0_0_15px_rgba(0,209,255,0.4)] hover:text-primary transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant/70 w-12 h-12 hover:text-primary transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant/70 w-12 h-12 hover:text-primary transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</nav>
+</body></html>
