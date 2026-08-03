@@ -74,7 +74,7 @@ export default function ManageAvailabilityPage() {
               type="date" 
               value={date} 
               onChange={(e) => setDate(e.target.value)} 
-              className="w-full md:w-1/2 border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
+              className="w-full md:w-1/2 border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
               required 
             />
           </div>
@@ -92,7 +92,7 @@ export default function ManageAvailabilityPage() {
                     type="time" 
                     value={slot.startTime} 
                     onChange={(e) => handleSlotChange(index, 'startTime', e.target.value)} 
-                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
+                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
                     required 
                   />
                   <span className="text-gray-400">to</span>
@@ -100,7 +100,7 @@ export default function ManageAvailabilityPage() {
                     type="time" 
                     value={slot.endTime} 
                     onChange={(e) => handleSlotChange(index, 'endTime', e.target.value)} 
-                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
+                    className="flex-1 border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all cursor-pointer" 
                     required 
                   />
                   {slots.length > 1 && (

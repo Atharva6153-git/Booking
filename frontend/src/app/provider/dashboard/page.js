@@ -66,14 +66,14 @@ export default function ProviderDashboard() {
           <form onSubmit={handleCreateService} className="border border-gray-100 rounded-2xl p-6 md:p-8 mb-10 bg-white shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
             <h2 className="text-xl font-bold text-black mb-6">Create New Service</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <input name="title" placeholder="Service Title" value={form.title} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
-              <input name="category" placeholder="Category (e.g. Plumbing)" value={form.category} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
+              <input name="title" placeholder="Service Title" value={form.title} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
+              <input name="category" placeholder="Category (e.g. Plumbing)" value={form.category} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
               <div className="md:col-span-2">
-                <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all h-24 resize-none" />
+                <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all h-24 resize-none" />
               </div>
-              <input name="price" type="number" placeholder="Price (₹)" value={form.price} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
-              <input name="durationMinutes" type="number" placeholder="Duration (minutes)" value={form.durationMinutes} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" />
-              <input name="area" placeholder="Area (e.g. Dombivli)" value={form.area} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all md:col-span-2" required />
+              <input name="price" type="number" placeholder="Price (₹)" value={form.price} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" required />
+              <input name="durationMinutes" type="number" placeholder="Duration (minutes)" value={form.durationMinutes} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" />
+              <input name="area" placeholder="Area (e.g. Dombivli)" value={form.area} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all md:col-span-2" required />
             </div>
             <button type="submit" className="w-full md:w-auto bg-black text-white rounded-lg px-8 py-3 text-sm font-medium hover:bg-gray-800 transition-colors">
               Publish Service

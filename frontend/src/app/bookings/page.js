@@ -160,7 +160,7 @@ export default function MyBookingsPage() {
                         min="1" max="5" 
                         value={reviewData.rating} 
                         onChange={(e) => setReviewData({ ...reviewData, rating: e.target.value })} 
-                        className="w-24 border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4" 
+                        className="w-24 border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4" 
                       />
                       
                       <label className="block text-sm font-medium text-gray-500 mb-2">Comment</label>
@@ -168,7 +168,7 @@ export default function MyBookingsPage() {
                         placeholder="Share your experience..." 
                         value={reviewData.comment} 
                         onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })} 
-                        className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4 h-24 resize-none" 
+                        className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-4 h-24 resize-none" 
                       />
                       
                       <button 

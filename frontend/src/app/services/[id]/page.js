@@ -134,7 +134,7 @@ export default function ServiceDetailPage() {
                 type="date" 
                 value={selectedDate} 
                 onChange={handleDateFilter} 
-                className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-6 cursor-pointer" 
+                className="w-full border border-gray-200 rounded-lg p-3 text-sm text-black focus:border-black focus:ring-1 focus:ring-black outline-none transition-all mb-6 cursor-pointer" 
               />
               
               {message && <p className="mb-4 text-sm font-medium text-black bg-gray-50 p-3 rounded-lg border border-gray-100">{message}</p>}
