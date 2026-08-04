@@ -88,9 +88,9 @@ export default function MyBookingsPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-6 md:p-12">
+    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-4 sm:p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tight text-black mb-10">My Bookings</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-8 sm:mb-10">My Bookings</h1>
 
         {message && (
           <div className="mb-8 p-4 bg-gray-50 border border-gray-200 text-black text-sm font-medium rounded-lg">
@@ -107,46 +107,48 @@ export default function MyBookingsPage() {
             <p className="text-gray-500">You haven't made any bookings yet.</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {bookings.map((b) => (
-              <div key={b._id} className="border border-gray-100 rounded-2xl p-6 md:p-8 hover:border-black transition-colors bg-white shadow-sm">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-widest ${statusColor[b.status] || 'text-gray-500'} bg-gray-50 border border-gray-100`}>
-                        {b.status}
-                      </span>
-                      <span className="text-sm font-medium text-gray-400">{b.date} • {b.startTime}-{b.endTime}</span>
-                    </div>
-                    
-                    <h2 className="text-2xl font-bold text-black mb-2">{b.service?.title}</h2>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Provider: <span className="text-black">{b.provider?.name}</span></p>
-                    <p className="text-sm text-gray-500 font-medium">Payment: <span className="capitalize text-black">{b.paymentStatus}</span></p>
+              <div key={b._id} className="border border-gray-100 rounded-2xl p-4 sm:p-6 md:p-8 hover:border-black transition-colors bg-white shadow-sm">
+                <div className="flex flex-col gap-4">
+                  {/* Top: status + date */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-widest ${statusColor[b.status] || 'text-gray-500'} bg-gray-50 border border-gray-100`}>
+                      {b.status}
+                    </span>
+                    <span className="text-sm font-medium text-gray-400">{b.date} · {b.startTime}-{b.endTime}</span>
                   </div>
-                  
-                  <div className="md:text-right flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start">
-                    <p className="text-2xl font-bold text-black mb-4">₹{b.finalPrice}</p>
-                    
-                    <div className="flex gap-2">
-                      {b.paymentStatus !== 'paid' && (
-                        <button 
-                          onClick={() => handlePayNow(b)} 
-                          disabled={payingId === b._id} 
-                          className="bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
-                        >
-                          {payingId === b._id ? 'Processing...' : 'Pay Now'}
-                        </button>
-                      )}
-                      
-                      {b.status === 'completed' && (
-                        <button 
-                          onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)} 
-                          className="bg-white border border-gray-200 text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
-                        >
-                          {reviewFormId === b._id ? 'Cancel' : 'Review'}
-                        </button>
-                      )}
+
+                  {/* Middle: title + info + price in one row */}
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="min-w-0">
+                      <h2 className="text-xl sm:text-2xl font-bold text-black mb-1 truncate">{b.service?.title}</h2>
+                      <p className="text-sm text-gray-500 font-medium mb-0.5">Provider: <span className="text-black">{b.provider?.name}</span></p>
+                      <p className="text-sm text-gray-500 font-medium">Payment: <span className="capitalize text-black">{b.paymentStatus}</span></p>
                     </div>
+                    <p className="text-2xl font-bold text-black shrink-0">₹{b.finalPrice}</p>
+                  </div>
+
+                  {/* Bottom: action buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {b.paymentStatus !== 'paid' && (
+                      <button
+                        onClick={() => handlePayNow(b)}
+                        disabled={payingId === b._id}
+                        className="flex-1 sm:flex-none bg-black text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors active:scale-[0.97]"
+                      >
+                        {payingId === b._id ? 'Processing...' : 'Pay Now'}
+                      </button>
+                    )}
+
+                    {b.status === 'completed' && (
+                      <button
+                        onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)}
+                        className="flex-1 sm:flex-none bg-white border border-gray-200 text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors active:scale-[0.97]"
+                      >
+                        {reviewFormId === b._id ? 'Cancel' : 'Review'}
+                      </button>
+                    )}
                   </div>
                 </div>
 

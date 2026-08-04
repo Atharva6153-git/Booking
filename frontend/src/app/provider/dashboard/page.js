@@ -41,16 +41,16 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-6 md:p-12">
+    <div className="min-h-[calc(100vh-73px)] bg-white w-full p-4 sm:p-6 md:p-12">
       <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-10 gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-black mb-2">My Services</h1>
-            <p className="text-gray-500">Manage your service offerings and availability.</p>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-2">My Services</h1>
+            <p className="text-gray-500 text-sm sm:text-base">Manage your service offerings and availability.</p>
           </div>
           <button 
             onClick={() => setShowForm(!showForm)} 
-            className="bg-black text-white rounded-md px-6 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
+            className="w-full sm:w-auto bg-black text-white rounded-md px-6 py-2.5 text-sm font-semibold hover:bg-gray-800 transition-colors active:scale-[0.97]"
           >
             {showForm ? 'Cancel' : '+ Add Service'}
           </button>
