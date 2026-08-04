@@ -29,22 +29,44 @@ exports.createService = async (req, res) => {
 // @route GET /api/services
 exports.getServices = async (req, res) => {
   try {
-    const { category, area, search, minPrice, maxPrice } = req.query;
+    const { category, area, search, minPrice, maxPrice, sort } = req.query;
 
     const filter = { isActive: true };
 
-    if (category) filter.category = category;
-    if (area) filter.area = area;
-    if (search) filter.title = { $regex: search, $options: 'i' };
+    if (category) filter.category = { $regex: category, $options: 'i' };
+    if (area) filter.area = { $regex: area, $options: 'i' };
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const services = await Service.find(filter)
-      .populate('provider', 'name')
-      .sort({ avgRating: -1, createdAt: -1 });
+    const services = await Service.find(filter).populate('provider', 'name');
+
+    if (sort === 'smart') {
+      // Smart Match score: weighted combination of normalised rating + normalised bookings
+      // score = 0.6 * (avgRating / 5) + 0.4 * (totalBookings / maxBookings)
+      const maxBookings = Math.max(...services.map((s) => s.totalBookings || 0), 1);
+
+      services.sort((a, b) => {
+        const scoreA = 0.6 * ((a.avgRating || 0) / 5) + 0.4 * ((a.totalBookings || 0) / maxBookings);
+        const scoreB = 0.6 * ((b.avgRating || 0) / 5) + 0.4 * ((b.totalBookings || 0) / maxBookings);
+        return scoreB - scoreA;
+      });
+    } else {
+      // Default: highest rating first, then newest
+      services.sort((a, b) => {
+        if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
 
     return res.status(200).json({ services });
   } catch (err) {
