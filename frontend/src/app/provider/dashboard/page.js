@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import api from '@/lib/axios';
+import { getSocket } from '@/lib/socket';
 
 export default function ProviderDashboard() {
   const [services, setServices] = useState([]);
@@ -11,6 +12,12 @@ export default function ProviderDashboard() {
 
   useEffect(() => {
     fetchMyServices();
+
+    // Real-time: refresh when provider creates/updates a service (e.g. in another tab)
+    const socket = getSocket();
+    const handleServicesUpdated = () => fetchMyServices();
+    socket.on('servicesUpdated', handleServicesUpdated);
+    return () => socket.off('servicesUpdated', handleServicesUpdated);
   }, []);
 
   const fetchMyServices = async () => {
@@ -34,7 +41,7 @@ export default function ProviderDashboard() {
       setMessage('Service created successfully!');
       setForm({ title: '', category: '', description: '', price: '', durationMinutes: 60, area: '' });
       setShowForm(false);
-      fetchMyServices();
+      // fetchMyServices is triggered via the socket event 'servicesUpdated'
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to create service');
     }

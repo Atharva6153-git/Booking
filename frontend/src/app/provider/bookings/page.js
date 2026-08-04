@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { getUser } from '@/lib/auth';
+import { getSocket } from '@/lib/socket';
 
 export default function ProviderBookingsPage() {
   const router = useRouter();
@@ -10,16 +12,24 @@ export default function ProviderBookingsPage() {
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
-    // Redirect customers to their own bookings page
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      const user = JSON.parse(stored);
-      if (user.role === 'customer') {
-        router.replace('/bookings');
-        return;
-      }
+    const user = getUser();
+    if (user?.role === 'customer') {
+      router.replace('/bookings');
+      return;
     }
+
     fetchBookings();
+
+    // Real-time: new booking arrived or a status changed
+    const socket = getSocket();
+    const handleNewBooking = () => fetchBookings();
+    const handleProviderBookingUpdated = () => fetchBookings();
+    socket.on('newBooking', handleNewBooking);
+    socket.on('providerBookingUpdated', handleProviderBookingUpdated);
+    return () => {
+      socket.off('newBooking', handleNewBooking);
+      socket.off('providerBookingUpdated', handleProviderBookingUpdated);
+    };
   }, []);
 
   const fetchBookings = async () => {
@@ -37,7 +47,7 @@ export default function ProviderBookingsPage() {
     setUpdatingId(bookingId);
     try {
       await api.patch(`/bookings/${bookingId}/status`, { status });
-      fetchBookings();
+      // fetchBookings is triggered via socket event 'providerBookingUpdated'
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update booking');
     } finally {
@@ -70,15 +80,12 @@ export default function ProviderBookingsPage() {
             {bookings.map((b) => (
               <div key={b._id} className="border border-gray-100 dark:border-neutral-800 rounded-2xl p-4 sm:p-6 hover:border-black dark:hover:border-neutral-600 transition-colors bg-white dark:bg-neutral-900 shadow-sm">
                 <div className="flex flex-col gap-4">
-                  {/* Status + date */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2.5 py-1 text-xs font-semibold rounded uppercase tracking-widest ${statusColor[b.status] || 'text-gray-500'} bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700`}>
                       {b.status}
                     </span>
                     <span className="text-sm font-medium text-gray-400 dark:text-gray-500">{b.date} · {b.startTime}-{b.endTime}</span>
                   </div>
-
-                  {/* Title + info + price */}
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
                       <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-1 truncate">{b.service?.title}</h2>
@@ -87,33 +94,22 @@ export default function ProviderBookingsPage() {
                     </div>
                     <p className="text-2xl font-bold text-black dark:text-white shrink-0">₹{b.finalPrice}</p>
                   </div>
-
-                  {/* Action buttons */}
                   <div className="flex flex-wrap gap-2">
                     {b.status === 'pending' && (
                       <>
-                        <button
-                          onClick={() => handleStatusUpdate(b._id, 'confirmed')}
-                          disabled={updatingId === b._id}
-                          className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]"
-                        >
+                        <button onClick={() => handleStatusUpdate(b._id, 'confirmed')} disabled={updatingId === b._id}
+                          className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]">
                           Accept
                         </button>
-                        <button
-                          onClick={() => handleStatusUpdate(b._id, 'cancelled')}
-                          disabled={updatingId === b._id}
-                          className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors active:scale-[0.97]"
-                        >
+                        <button onClick={() => handleStatusUpdate(b._id, 'cancelled')} disabled={updatingId === b._id}
+                          className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors active:scale-[0.97]">
                           Reject
                         </button>
                       </>
                     )}
                     {b.status === 'confirmed' && (
-                      <button
-                        onClick={() => handleStatusUpdate(b._id, 'completed')}
-                        disabled={updatingId === b._id}
-                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]"
-                      >
+                      <button onClick={() => handleStatusUpdate(b._id, 'completed')} disabled={updatingId === b._id}
+                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]">
                         Mark Completed
                       </button>
                     )}

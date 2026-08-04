@@ -24,6 +24,10 @@ exports.createAvailability = async (req, res) => {
       slots: slots.map((s) => ({ startTime: s.startTime, endTime: s.endTime })),
     });
 
+    // Notify anyone viewing this service's detail page that new slots are available
+    const io = req.app.get('io');
+    io.emit('availabilityUpdated', { serviceId });
+
     return res.status(201).json({ message: 'Availability created', availability });
   } catch (err) {
     if (err.code === 11000) {
@@ -83,6 +87,10 @@ exports.removeSlot = async (req, res) => {
 
     slot.deleteOne();
     await availability.save();
+
+    // Notify anyone viewing this service's detail page that slots changed
+    const io = req.app.get('io');
+    io.emit('availabilityUpdated', { serviceId: availability.service.toString() });
 
     return res.status(200).json({ message: 'Slot removed', availability });
   } catch (err) {

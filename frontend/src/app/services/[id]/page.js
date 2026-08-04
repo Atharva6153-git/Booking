@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { getSocket } from '@/lib/socket';
 
 export default function ServiceDetailPage() {
   const { id } = useParams();
@@ -19,6 +20,16 @@ export default function ServiceDetailPage() {
     fetchService();
     fetchAvailability();
     fetchReviews();
+
+    // Real-time: refresh slots when availability changes for THIS service
+    const socket = getSocket();
+    const handleAvailabilityUpdated = ({ serviceId }) => {
+      if (serviceId === id) {
+        fetchAvailability(selectedDate || undefined);
+      }
+    };
+    socket.on('availabilityUpdated', handleAvailabilityUpdated);
+    return () => socket.off('availabilityUpdated', handleAvailabilityUpdated);
   }, [id]);
 
   const fetchService = async () => {
@@ -159,12 +170,7 @@ export default function ServiceDetailPage() {
             <div className="bg-white dark:bg-neutral-900 rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-5">
                 <h2 className="text-lg font-bold text-black dark:text-white">Book a Slot</h2>
-                <button
-                  onClick={() => setShowBooking(false)}
-                  className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xl font-bold leading-none"
-                >
-                  ✕
-                </button>
+                <button onClick={() => setShowBooking(false)} className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white text-xl font-bold leading-none">✕</button>
               </div>
               <BookingPanel />
             </div>
@@ -172,7 +178,6 @@ export default function ServiceDetailPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Main content */}
           <div className="lg:col-span-2">
             <div className="mb-10">
               <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -183,23 +188,17 @@ export default function ServiceDetailPage() {
                   ★ {service.avgRating?.toFixed(1) || 'New'}
                 </span>
               </div>
-
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white mb-4 leading-tight">
-                {service.title}
-              </h1>
-
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white mb-4 leading-tight">{service.title}</h1>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-500 dark:text-gray-400 text-sm font-medium mb-6">
                 <span>By <span className="text-black dark:text-white">{service.provider?.name}</span></span>
                 <span className="text-gray-300 dark:text-gray-600">•</span>
                 <span>{service.area}</span>
               </div>
-
               <div className="text-gray-600 dark:text-gray-300 leading-relaxed text-base sm:text-lg">
                 <p>{service.description}</p>
               </div>
             </div>
 
-            {/* Reviews */}
             <div className="border-t border-gray-100 dark:border-neutral-800 pt-8">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-black dark:text-white mb-6">Customer Reviews</h2>
               {reviews.length === 0 ? (
@@ -222,7 +221,6 @@ export default function ServiceDetailPage() {
             </div>
           </div>
 
-          {/* Desktop booking sidebar */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-28">
               <BookingPanel />

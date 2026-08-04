@@ -58,6 +58,16 @@ exports.createBooking = async (req, res) => {
 
     await Service.findByIdAndUpdate(service._id, { $inc: { totalBookings: 1 } });
 
+    const io = req.app.get('io');
+
+    // Tell the provider they have a new booking
+    io.to(updatedAvailability.provider.toString()).emit('newBooking', {
+      bookingId: booking._id,
+    });
+
+    // Tell everyone watching this service's availability that a slot was taken
+    io.emit('availabilityUpdated', { serviceId: service._id.toString() });
+
     return res.status(201).json({ message: 'Booking created', booking });
   } catch (err) {
     console.error('Create booking error:', err);
@@ -117,13 +127,24 @@ exports.updateBookingStatus = async (req, res) => {
         { _id: booking.availability, 'slots._id': booking.slotId },
         { $set: { 'slots.$.isBooked': false, 'slots.$.bookingId': null } }
       );
+      // Slot freed — notify anyone watching this service's availability
+      const io = req.app.get('io');
+      io.emit('availabilityUpdated', { serviceId: booking.service.toString() });
     }
 
     booking.status = status;
     await booking.save();
 
     const io = req.app.get('io');
+
+    // Notify the customer their booking status changed
     io.to(booking.customer.toString()).emit('bookingStatusUpdate', {
+      bookingId: booking._id,
+      status: booking.status,
+    });
+
+    // Also notify the provider's own bookings page
+    io.to(booking.provider.toString()).emit('providerBookingUpdated', {
       bookingId: booking._id,
       status: booking.status,
     });

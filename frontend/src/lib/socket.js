@@ -10,3 +10,11 @@ export const getSocket = () => {
   }
   return socket;
 };
+
+// Disconnect the current socket and clear it (call on logout)
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};

@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import api from '@/lib/axios';
+import { getUser, clearUser } from '@/lib/auth';
+import { disconnectSocket } from '@/lib/socket';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function Navbar() {
@@ -12,8 +14,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (stored) setUser(JSON.parse(stored));
+    setUser(getUser());
   }, [pathname]);
 
   useEffect(() => {
@@ -26,7 +27,8 @@ export default function Navbar() {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      localStorage.removeItem('user');
+      clearUser();
+      disconnectSocket();
       setUser(null);
       router.push('/login');
     }
@@ -54,12 +56,10 @@ export default function Navbar() {
       className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-300 ${className}`}
     >
       {theme === 'dark' ? (
-        /* Sun icon */
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
         </svg>
       ) : (
-        /* Moon icon */
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
         </svg>
@@ -69,9 +69,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-gray-100 dark:border-neutral-800">
-      {/* Main bar */}
       <div className="px-4 sm:px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
         <span className="font-bold text-xl tracking-tight text-black dark:text-white">ServiceHub</span>
 
         {/* Desktop links */}
@@ -91,7 +89,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop right side */}
+        {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3 ml-auto">
           <ThemeToggle />
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -105,7 +103,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile right: theme toggle + hamburger */}
+        {/* Mobile: theme toggle + hamburger */}
         <div className="md:hidden flex items-center gap-2">
           <ThemeToggle />
           <button
@@ -120,7 +118,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
+      {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-4 flex flex-col gap-4">
           {links.map((link) => (

@@ -19,6 +19,10 @@ exports.createService = async (req, res) => {
       area,
     });
 
+    // Notify all connected clients that the service list has changed
+    const io = req.app.get('io');
+    io.emit('servicesUpdated');
+
     return res.status(201).json({ message: 'Service created', service });
   } catch (err) {
     console.error('Create service error:', err);
@@ -51,17 +55,13 @@ exports.getServices = async (req, res) => {
     const services = await Service.find(filter).populate('provider', 'name');
 
     if (sort === 'smart') {
-      // Smart Match score: weighted combination of normalised rating + normalised bookings
-      // score = 0.6 * (avgRating / 5) + 0.4 * (totalBookings / maxBookings)
       const maxBookings = Math.max(...services.map((s) => s.totalBookings || 0), 1);
-
       services.sort((a, b) => {
         const scoreA = 0.6 * ((a.avgRating || 0) / 5) + 0.4 * ((a.totalBookings || 0) / maxBookings);
         const scoreB = 0.6 * ((b.avgRating || 0) / 5) + 0.4 * ((b.totalBookings || 0) / maxBookings);
         return scoreB - scoreA;
       });
     } else {
-      // Default: highest rating first, then newest
       services.sort((a, b) => {
         if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -119,6 +119,10 @@ exports.updateService = async (req, res) => {
     });
 
     await service.save();
+
+    const io = req.app.get('io');
+    io.emit('servicesUpdated');
+
     return res.status(200).json({ message: 'Service updated', service });
   } catch (err) {
     console.error('Update service error:', err);

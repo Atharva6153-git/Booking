@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { getSocket } from '@/lib/socket';
+import { saveUser } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,7 +20,8 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', form);
       const user = res.data.user;
-      localStorage.setItem('user', JSON.stringify(user));
+      // sessionStorage keeps each browser tab's session separate
+      saveUser(user);
       const socket = getSocket();
       socket.emit('join', user.id);
       if (user.role === 'provider') {
