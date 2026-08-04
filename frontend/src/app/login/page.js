@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { getSocket } from '@/lib/socket';
-import { saveUser } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,9 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', form);
       const user = res.data.user;
-      // sessionStorage keeps each browser tab's session separate
-      saveUser(user);
+      // Save to context (which also saves to localStorage)
+      setUser(user);
+      // Join socket room for real-time notifications
       const socket = getSocket();
       socket.emit('join', user.id);
       if (user.role === 'provider') {

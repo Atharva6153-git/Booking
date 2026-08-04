@@ -2,20 +2,36 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import api from '@/lib/axios';
-import { getUser, clearUser } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 import { disconnectSocket } from '@/lib/socket';
 import { useTheme } from '@/context/ThemeContext';
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label="Toggle dark mode"
+      className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-300"
+    >
+      {theme === 'dark' ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-
-  useEffect(() => {
-    setUser(getUser());
-  }, [pathname]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -27,9 +43,8 @@ export default function Navbar() {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      clearUser();
-      disconnectSocket();
       setUser(null);
+      disconnectSocket();
       router.push('/login');
     }
   };
@@ -48,24 +63,6 @@ export default function Navbar() {
   ];
 
   const links = user.role === 'provider' ? providerLinks : customerLinks;
-
-  const ThemeToggle = ({ className = '' }) => (
-    <button
-      onClick={toggleTheme}
-      aria-label="Toggle dark mode"
-      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-300 ${className}`}
-    >
-      {theme === 'dark' ? (
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-        </svg>
-      )}
-    </button>
-  );
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-gray-100 dark:border-neutral-800">
@@ -93,7 +90,8 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3 ml-auto">
           <ThemeToggle />
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            {user.name} <span className="text-gray-300 dark:text-gray-600">|</span> <span className="capitalize">{user.role}</span>
+            {user.name} <span className="text-gray-300 dark:text-gray-600">|</span>{' '}
+            <span className="capitalize">{user.role}</span>
           </span>
           <button
             onClick={handleLogout}
@@ -103,7 +101,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile: theme toggle + hamburger */}
+        {/* Mobile: theme + hamburger */}
         <div className="md:hidden flex items-center gap-2">
           <ThemeToggle />
           <button

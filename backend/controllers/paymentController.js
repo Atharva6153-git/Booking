@@ -66,6 +66,11 @@ exports.verifyPayment = async (req, res) => {
     booking.status = 'confirmed';
     await booking.save();
 
+    // Notify both customer and provider that payment succeeded
+    const io = req.app.get('io');
+    io.to(booking.customer.toString()).emit('paymentVerified', { bookingId: booking._id });
+    io.to(booking.provider.toString()).emit('paymentVerified', { bookingId: booking._id });
+
     return res.status(200).json({ message: 'Payment verified', booking });
   } catch (err) {
     console.error('Verify payment error:', err);

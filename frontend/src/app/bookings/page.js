@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
-import { getUser } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 import { getSocket } from '@/lib/socket';
 
 export default function MyBookingsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState(null);
@@ -15,20 +16,24 @@ export default function MyBookingsPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const user = getUser();
     if (user?.role === 'provider') {
       router.replace('/provider/bookings');
       return;
     }
-
     fetchBookings();
 
-    // Real-time: booking status changed by provider
     const socket = getSocket();
-    const handleStatusUpdate = () => fetchBookings();
-    socket.on('bookingStatusUpdate', handleStatusUpdate);
-    return () => socket.off('bookingStatusUpdate', handleStatusUpdate);
-  }, []);
+    // Refresh when provider changes booking status
+    const onStatusUpdate = () => fetchBookings();
+    // Refresh when payment is verified (payment status changes)
+    const onPaymentVerified = () => fetchBookings();
+    socket.on('bookingStatusUpdate', onStatusUpdate);
+    socket.on('paymentVerified', onPaymentVerified);
+    return () => {
+      socket.off('bookingStatusUpdate', onStatusUpdate);
+      socket.off('paymentVerified', onPaymentVerified);
+    };
+  }, [user]);
 
   const fetchBookings = async () => {
     try {
@@ -129,6 +134,7 @@ export default function MyBookingsPage() {
                     </span>
                     <span className="text-sm font-medium text-gray-400 dark:text-gray-500">{b.date} · {b.startTime}-{b.endTime}</span>
                   </div>
+
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
                       <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-1 truncate">{b.service?.title}</h2>
@@ -137,16 +143,22 @@ export default function MyBookingsPage() {
                     </div>
                     <p className="text-2xl font-bold text-black dark:text-white shrink-0">₹{b.finalPrice}</p>
                   </div>
+
                   <div className="flex flex-wrap gap-2">
-                    {b.paymentStatus !== 'paid' && (
-                      <button onClick={() => handlePayNow(b)} disabled={payingId === b._id}
-                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]">
+                    {b.paymentStatus !== 'paid' && b.status !== 'cancelled' && (
+                      <button
+                        onClick={() => handlePayNow(b)}
+                        disabled={payingId === b._id}
+                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]"
+                      >
                         {payingId === b._id ? 'Processing...' : 'Pay Now'}
                       </button>
                     )}
                     {b.status === 'completed' && (
-                      <button onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)}
-                        className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors active:scale-[0.97]">
+                      <button
+                        onClick={() => setReviewFormId(reviewFormId === b._id ? null : b._id)}
+                        className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors active:scale-[0.97]"
+                      >
                         {reviewFormId === b._id ? 'Cancel' : 'Review'}
                       </button>
                     )}
@@ -159,18 +171,26 @@ export default function MyBookingsPage() {
                     <div className="max-w-md space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Rating (1–5)</label>
-                        <input type="number" min="1" max="5" value={reviewData.rating}
+                        <input
+                          type="number" min="1" max="5"
+                          value={reviewData.rating}
                           onChange={(e) => setReviewData({ ...reviewData, rating: e.target.value })}
-                          className="w-24 border border-gray-200 dark:border-neutral-700 rounded-lg p-3 text-sm text-black dark:text-white bg-white dark:bg-neutral-900 focus:border-black dark:focus:border-white outline-none transition-all" />
+                          className="w-24 border border-gray-200 dark:border-neutral-700 rounded-lg p-3 text-sm text-black dark:text-white bg-white dark:bg-neutral-900 focus:border-black dark:focus:border-white outline-none transition-all"
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Comment</label>
-                        <textarea placeholder="Share your experience..." value={reviewData.comment}
+                        <textarea
+                          placeholder="Share your experience..."
+                          value={reviewData.comment}
                           onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
-                          className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg p-3 text-sm text-black dark:text-white bg-white dark:bg-neutral-900 focus:border-black dark:focus:border-white outline-none transition-all h-24 resize-none placeholder:text-gray-400 dark:placeholder:text-gray-600" />
+                          className="w-full border border-gray-200 dark:border-neutral-700 rounded-lg p-3 text-sm text-black dark:text-white bg-white dark:bg-neutral-900 focus:border-black dark:focus:border-white outline-none transition-all h-24 resize-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                        />
                       </div>
-                      <button onClick={() => handleSubmitReview(b._id)}
-                        className="bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
+                      <button
+                        onClick={() => handleSubmitReview(b._id)}
+                        className="bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                      >
                         Submit Review
                       </button>
                     </div>

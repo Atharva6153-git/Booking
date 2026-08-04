@@ -2,35 +2,36 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
-import { getUser } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 import { getSocket } from '@/lib/socket';
 
 export default function ProviderBookingsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
-    const user = getUser();
     if (user?.role === 'customer') {
       router.replace('/bookings');
       return;
     }
-
     fetchBookings();
 
-    // Real-time: new booking arrived or a status changed
     const socket = getSocket();
-    const handleNewBooking = () => fetchBookings();
-    const handleProviderBookingUpdated = () => fetchBookings();
-    socket.on('newBooking', handleNewBooking);
-    socket.on('providerBookingUpdated', handleProviderBookingUpdated);
+    const onNewBooking = () => fetchBookings();
+    const onProviderBookingUpdated = () => fetchBookings();
+    const onPaymentVerified = () => fetchBookings();
+    socket.on('newBooking', onNewBooking);
+    socket.on('providerBookingUpdated', onProviderBookingUpdated);
+    socket.on('paymentVerified', onPaymentVerified);
     return () => {
-      socket.off('newBooking', handleNewBooking);
-      socket.off('providerBookingUpdated', handleProviderBookingUpdated);
+      socket.off('newBooking', onNewBooking);
+      socket.off('providerBookingUpdated', onProviderBookingUpdated);
+      socket.off('paymentVerified', onPaymentVerified);
     };
-  }, []);
+  }, [user]);
 
   const fetchBookings = async () => {
     try {
