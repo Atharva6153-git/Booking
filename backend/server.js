@@ -9,8 +9,27 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
+// Build allowed origins from env so any deployment URL works without code changes.
+// Set FRONTEND_URL in Render / Vercel environment variables to your actual domain.
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean); // remove undefined if env var not set
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. Postman, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+};
+
 const io = new Server(server, {
-  cors: { origin: ['http://localhost:3000', 'https://booking-apexgg.vercel.app'], credentials: true },
+  cors: corsOptions,
 });
 
 // make io accessible inside controllers via req.app.get('io')
@@ -24,7 +43,7 @@ io.on('connection', (socket) => {
   });
 });
 
-app.use(cors({ origin: ['http://localhost:3000', 'https://booking-apexgg.vercel.app'], credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 

@@ -15,11 +15,14 @@ const generateToken = (user, sessionId) => {
 // Helper: set the JWT inside an httpOnly cookie
 // httpOnly = JavaScript on the frontend CANNOT read this cookie.
 // This is what protects the token from XSS-based theft (unlike localStorage).
+// In production we use sameSite:'none' so the cookie works cross-domain
+// (frontend on Vercel, backend on Render). Must pair with secure:true.
 const setTokenCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === 'production';
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-    sameSite: 'strict',
+    secure: isProd,           // HTTPS only in prod
+    sameSite: isProd ? 'none' : 'strict', // 'none' required for cross-domain in prod
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
