@@ -1,13 +1,24 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 
 export default function ProviderBookingsPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
+    // Redirect customers to their own bookings page
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const user = JSON.parse(stored);
+      if (user.role === 'customer') {
+        router.replace('/bookings');
+        return;
+      }
+    }
     fetchBookings();
   }, []);
 

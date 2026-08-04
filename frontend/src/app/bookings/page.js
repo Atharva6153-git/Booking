@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { getSocket } from '@/lib/socket';
 
 export default function MyBookingsPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState(null);
@@ -12,6 +14,15 @@ export default function MyBookingsPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    // Redirect providers to their own bookings page
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const user = JSON.parse(stored);
+      if (user.role === 'provider') {
+        router.replace('/provider/bookings');
+        return;
+      }
+    }
     fetchBookings();
     const socket = getSocket();
     socket.on('bookingStatusUpdate', () => fetchBookings());
