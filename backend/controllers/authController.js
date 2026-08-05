@@ -13,17 +13,17 @@ const generateToken = (user, sessionId) => {
 };
 
 // Helper: set the JWT inside an httpOnly cookie
-// httpOnly = JavaScript on the frontend CANNOT read this cookie.
-// This is what protects the token from XSS-based theft (unlike localStorage).
-// In production we use sameSite:'none' so the cookie works cross-domain
-// (frontend on Vercel, backend on Render). Must pair with secure:true.
+// Always use secure + sameSite:'none' so the cookie works cross-domain
+// between Vercel (frontend) and Render (backend). Both run on HTTPS so
+// secure:true is always safe. sameSite:'none' is required for cross-domain.
+// For local dev (HTTP), sameSite:'lax' is used instead.
 const setTokenCookie = (res, token) => {
-  const isProd = process.env.NODE_ENV === 'production';
+  const isLocalDev = process.env.NODE_ENV === 'development';
   res.cookie('token', token, {
     httpOnly: true,
-    secure: isProd,           // HTTPS only in prod
-    sameSite: isProd ? 'none' : 'strict', // 'none' required for cross-domain in prod
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: !isLocalDev,               // false only in local dev
+    sameSite: isLocalDev ? 'lax' : 'none', // 'none' required for cross-domain
+    maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
   });
 };
 
@@ -102,11 +102,15 @@ exports.login = async (req, res) => {
 // @route POST /api/auth/logout
 exports.logout = async (req, res) => {
   try {
-    // Clear the session id in DB too, so the cookie (if somehow reused) is dead
     if (req.user) {
       await User.findByIdAndUpdate(req.user.id, { currentSessionId: null });
     }
-    res.clearCookie('token');
+    const isLocalDev = process.env.NODE_ENV === 'development';
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: !isLocalDev,
+      sameSite: isLocalDev ? 'lax' : 'none',
+    });
     return res.status(200).json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error('Logout error:', err);

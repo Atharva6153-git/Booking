@@ -15,10 +15,9 @@ export default function ProviderDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wait for auth check to complete before deciding what to do
     if (!ready) return;
 
-    // Redirect non-providers away
+    // Only redirect to login if there is genuinely no user (no cookie, no cache)
     if (!user) { router.replace('/login'); return; }
     if (user.role !== 'provider') { router.replace('/services'); return; }
 
