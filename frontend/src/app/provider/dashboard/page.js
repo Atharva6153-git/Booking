@@ -1,9 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { useAuth } from '@/context/AuthContext';
 import { getSocket } from '@/lib/socket';
 
 export default function ProviderDashboard() {
+  const router = useRouter();
+  const { user, ready } = useAuth();
   const [services, setServices] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', category: '', description: '', price: '', durationMinutes: 60, area: '' });
@@ -11,16 +15,23 @@ export default function ProviderDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for auth check to complete before deciding what to do
+    if (!ready) return;
+
+    // Redirect non-providers away
+    if (!user) { router.replace('/login'); return; }
+    if (user.role !== 'provider') { router.replace('/services'); return; }
+
     fetchMyServices();
 
-    // Real-time: refresh when provider creates/updates a service (e.g. in another tab)
     const socket = getSocket();
-    const handleServicesUpdated = () => fetchMyServices();
-    socket.on('servicesUpdated', handleServicesUpdated);
-    return () => socket.off('servicesUpdated', handleServicesUpdated);
-  }, []);
+    const onServicesUpdated = () => fetchMyServices();
+    socket.on('servicesUpdated', onServicesUpdated);
+    return () => socket.off('servicesUpdated', onServicesUpdated);
+  }, [ready, user]);
 
   const fetchMyServices = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/services/provider/my');
       setServices(res.data.services);
@@ -37,7 +48,11 @@ export default function ProviderDashboard() {
     e.preventDefault();
     setMessage('');
     try {
-      await api.post('/services', { ...form, price: Number(form.price), durationMinutes: Number(form.durationMinutes) });
+      await api.post('/services', {
+        ...form,
+        price: Number(form.price),
+        durationMinutes: Number(form.durationMinutes),
+      });
       setMessage('Service created successfully!');
       setForm({ title: '', category: '', description: '', price: '', durationMinutes: 60, area: '' });
       setShowForm(false);
@@ -48,6 +63,15 @@ export default function ProviderDashboard() {
   };
 
   const inputCls = "w-full border border-gray-200 dark:border-neutral-700 rounded-lg p-3 text-sm text-black dark:text-white bg-white dark:bg-neutral-900 focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600";
+
+  // Show spinner while auth is being confirmed
+  if (!ready) {
+    return (
+      <div className="min-h-[calc(100vh-73px)] bg-white dark:bg-neutral-950 flex items-center justify-center">
+        <p className="text-gray-400 animate-pulse">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-73px)] bg-white dark:bg-neutral-950 w-full p-4 sm:p-6 md:p-12">
@@ -116,10 +140,14 @@ export default function ProviderDashboard() {
                     <p className="font-bold text-lg text-black dark:text-white">₹{service.price}</p>
                   </div>
                   <h2 className="font-bold text-xl text-black dark:text-white mb-2">{service.title}</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6">{service.area}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{service.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6">{service.area} · {service.durationMinutes} min</p>
                 </div>
                 <div className="pt-4 border-t border-gray-50 dark:border-neutral-800">
-                  <a href={`/provider/availability/${service._id}`} className="text-black dark:text-white text-sm font-medium hover:underline inline-flex items-center gap-1">
+                  <a
+                    href={`/provider/availability/${service._id}`}
+                    className="text-black dark:text-white text-sm font-medium hover:underline inline-flex items-center gap-1"
+                  >
                     Manage Slots &rarr;
                   </a>
                 </div>

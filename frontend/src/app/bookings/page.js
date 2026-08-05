@@ -7,7 +7,7 @@ import { getSocket } from '@/lib/socket';
 
 export default function MyBookingsPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState(null);
@@ -16,16 +16,14 @@ export default function MyBookingsPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (user?.role === 'provider') {
-      router.replace('/provider/bookings');
-      return;
-    }
+    if (!ready) return;
+    if (!user) { router.replace('/login'); return; }
+    if (user.role === 'provider') { router.replace('/provider/bookings'); return; }
+
     fetchBookings();
 
     const socket = getSocket();
-    // Refresh when provider changes booking status
     const onStatusUpdate = () => fetchBookings();
-    // Refresh when payment is verified (payment status changes)
     const onPaymentVerified = () => fetchBookings();
     socket.on('bookingStatusUpdate', onStatusUpdate);
     socket.on('paymentVerified', onPaymentVerified);
@@ -33,7 +31,7 @@ export default function MyBookingsPage() {
       socket.off('bookingStatusUpdate', onStatusUpdate);
       socket.off('paymentVerified', onPaymentVerified);
     };
-  }, [user]);
+  }, [ready, user]);
 
   const fetchBookings = async () => {
     try {

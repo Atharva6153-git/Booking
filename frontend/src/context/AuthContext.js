@@ -4,35 +4,37 @@ import api from '@/lib/axios';
 import { saveUser, getUser, clearUser } from '@/lib/auth';
 import { getSocket } from '@/lib/socket';
 
-const AuthContext = createContext({ user: null, setUser: () => {} });
+const AuthContext = createContext({
+  user: null,
+  ready: false,
+  setUser: () => {},
+});
 
 export function AuthProvider({ children }) {
-  const [user, setUserState] = useState(null);
+  // Seed state from localStorage immediately so Navbar renders on first paint
+  const [user, setUserState] = useState(() => getUser());
+  // ready = /auth/me check has completed (used by pages, NOT the Navbar)
   const [ready, setReady] = useState(false);
 
-  // On every mount, check if the JWT cookie is still valid.
-  // If it is, restore (or refresh) the user in localStorage.
-  // This means: close tab → reopen → still logged in, correct role, correct data.
   useEffect(() => {
     const restore = async () => {
-      // Optimistically show cached user immediately (no flash)
       const cached = getUser();
+      // Apply cached value right away — no flash of empty Navbar
       if (cached) setUserState(cached);
 
       try {
-        // Verify the cookie is still valid with the backend
+        // Confirm the JWT cookie is still valid and get fresh user data
         const res = await api.get('/auth/me');
-        const freshUser = res.data.user;
-        // Merge with any extra fields we store locally (name etc.)
-        // /auth/me returns { id, role } — enrich with cached name if available
-        const merged = { ...cached, ...freshUser };
+        const fresh = res.data.user;
+        // Merge — /auth/me gives us id + name + email + role from DB
+        const merged = { ...(cached || {}), ...fresh };
         saveUser(merged);
         setUserState(merged);
-        // Re-join socket room in case the socket reconnected
+        // Re-join socket room so real-time events keep working
         const socket = getSocket();
         socket.emit('join', merged.id);
       } catch {
-        // Cookie expired or invalid — clear everything
+        // Cookie invalid/expired — treat as logged out
         clearUser();
         setUserState(null);
       } finally {
@@ -52,10 +54,11 @@ export function AuthProvider({ children }) {
     setUserState(u);
   };
 
-  if (!ready) return null; // Prevent flash of wrong state
-
+  // IMPORTANT: always render children — never block on ready.
+  // The Navbar reads `user` from context and shows instantly from localStorage.
+  // Individual pages can check `ready` if they need to know auth is confirmed.
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, ready, setUser }}>
       {children}
     </AuthContext.Provider>
   );

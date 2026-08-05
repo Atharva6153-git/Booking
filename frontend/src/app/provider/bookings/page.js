@@ -7,16 +7,17 @@ import { getSocket } from '@/lib/socket';
 
 export default function ProviderBookingsPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
-    if (user?.role === 'customer') {
-      router.replace('/bookings');
-      return;
-    }
+    if (!ready) return;
+
+    if (!user) { router.replace('/login'); return; }
+    if (user.role !== 'provider') { router.replace('/bookings'); return; }
+
     fetchBookings();
 
     const socket = getSocket();
@@ -31,9 +32,10 @@ export default function ProviderBookingsPage() {
       socket.off('providerBookingUpdated', onProviderBookingUpdated);
       socket.off('paymentVerified', onPaymentVerified);
     };
-  }, [user]);
+  }, [ready, user]);
 
   const fetchBookings = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/bookings/provider');
       setBookings(res.data.bookings);
@@ -48,9 +50,10 @@ export default function ProviderBookingsPage() {
     setUpdatingId(bookingId);
     try {
       await api.patch(`/bookings/${bookingId}/status`, { status });
-      // fetchBookings is triggered via socket event 'providerBookingUpdated'
+      // fetchBookings triggered via socket 'providerBookingUpdated'
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update booking');
+      fetchBookings(); // fallback refresh if socket missed
     } finally {
       setUpdatingId(null);
     }
@@ -62,6 +65,14 @@ export default function ProviderBookingsPage() {
     completed: 'text-blue-600',
     cancelled: 'text-red-500',
   };
+
+  if (!ready) {
+    return (
+      <div className="min-h-[calc(100vh-73px)] bg-white dark:bg-neutral-950 flex items-center justify-center">
+        <p className="text-gray-400 animate-pulse">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-73px)] bg-white dark:bg-neutral-950 w-full p-4 sm:p-6 md:p-12">
@@ -87,30 +98,48 @@ export default function ProviderBookingsPage() {
                     </span>
                     <span className="text-sm font-medium text-gray-400 dark:text-gray-500">{b.date} · {b.startTime}-{b.endTime}</span>
                   </div>
+
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
                       <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-1 truncate">{b.service?.title}</h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">Customer: <span className="text-black dark:text-white">{b.customer?.name}</span></p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Payment: <span className="capitalize text-black dark:text-white">{b.paymentStatus}</span></p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">
+                        Customer: <span className="text-black dark:text-white">{b.customer?.name}</span>
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        Payment:{' '}
+                        <span className={`capitalize font-semibold ${b.paymentStatus === 'paid' ? 'text-green-600' : 'text-black dark:text-white'}`}>
+                          {b.paymentStatus}
+                        </span>
+                      </p>
                     </div>
                     <p className="text-2xl font-bold text-black dark:text-white shrink-0">₹{b.finalPrice}</p>
                   </div>
+
                   <div className="flex flex-wrap gap-2">
                     {b.status === 'pending' && (
                       <>
-                        <button onClick={() => handleStatusUpdate(b._id, 'confirmed')} disabled={updatingId === b._id}
-                          className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]">
+                        <button
+                          onClick={() => handleStatusUpdate(b._id, 'confirmed')}
+                          disabled={updatingId === b._id}
+                          className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]"
+                        >
                           Accept
                         </button>
-                        <button onClick={() => handleStatusUpdate(b._id, 'cancelled')} disabled={updatingId === b._id}
-                          className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors active:scale-[0.97]">
+                        <button
+                          onClick={() => handleStatusUpdate(b._id, 'cancelled')}
+                          disabled={updatingId === b._id}
+                          className="flex-1 sm:flex-none bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-black dark:text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-colors active:scale-[0.97]"
+                        >
                           Reject
                         </button>
                       </>
                     )}
                     {b.status === 'confirmed' && (
-                      <button onClick={() => handleStatusUpdate(b._id, 'completed')} disabled={updatingId === b._id}
-                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]">
+                      <button
+                        onClick={() => handleStatusUpdate(b._id, 'completed')}
+                        disabled={updatingId === b._id}
+                        className="flex-1 sm:flex-none bg-black dark:bg-white text-white dark:text-black rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors active:scale-[0.97]"
+                      >
                         Mark Completed
                       </button>
                     )}
